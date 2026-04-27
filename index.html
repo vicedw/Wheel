@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lykkehjul</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      color: white;
+      background: linear-gradient(to bottom, #040814 0%, #0a1330 48%, #101d45 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      padding: 20px;
+    }
+
+    .wheel-wrap {
+      position: relative;
+      width: 620px;
+      max-width: 94vw;
+      margin: 0 auto;
+    }
+
+    #wheel {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 50%;
+      background: transparent;
+      filter: drop-shadow(0 0 18px rgba(255,255,255,0.10));
+    }
+
+    .pointer {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-top: 34px solid #f8fafc;
+      z-index: 4;
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.45));
+    }
+
+    button {
+      margin-top: 24px;
+      padding: 14px 34px;
+      border-radius: 999px;
+      border: none;
+      font-size: 18px;
+      font-weight: bold;
+      color: #1f2937;
+      background: linear-gradient(135deg, #7ed6a7, #8ccff8);
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.28);
+    }
+
+    button:disabled {
+      opacity: 0.72;
+      cursor: default;
+    }
+
+    .message {
+      margin-top: 22px;
+      font-size: 34px;
+      font-weight: 800;
+      min-height: 44px;
+      color: #ffffff;
+      text-shadow: 0 0 14px rgba(255,255,255,0.25);
+    }
+
+    .result {
+      font-size: 34px;
+      font-weight: 800;
+      min-height: 42px;
+      color: #facc15;
+      text-shadow:
+        0 0 10px rgba(250,204,21,0.55),
+        0 0 20px rgba(250,204,21,0.35);
+    }
+
+    #confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="confetti"></canvas>
+
+  <div class="container">
+    <div class="wheel-wrap">
+      <div class="pointer"></div>
+      <canvas id="wheel" width="620" height="620"></canvas>
+    </div>
+
+    <button id="spinBtn">Snurr</button>
+    <div class="message" id="message"></div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const names = [
+      "Jan-Inge", "Tina", "Olena", "Morten",
+      "Jocelene", "Ajay", "Parthesh", "Omkar",
+      "Falke", "Carsten", "Karsten", "Christopher",
+      "Andreas", "Kristina", "Irina", "Kalle"
+    ];
+
+    const colors = [
+      "#cfeecf", "#ffdcb8", "#c7e7ff", "#f8d2e2",
+      "#fff0b8", "#d9d4ff", "#bff4e6", "#ffd6d6",
+      "#d8f3dc", "#fce7f3", "#bae6fd", "#fde68a",
+      "#ddd6fe", "#bbf7d0", "#fecaca", "#bfdbfe"
+    ];
+
+    const wheelCanvas = document.getElementById("wheel");
+    const wheelCtx = wheelCanvas.getContext("2d");
+
+    const confettiCanvas = document.getElementById("confetti");
+    const confettiCtx = confettiCanvas.getContext("2d");
+
+    const spinBtn = document.getElementById("spinBtn");
+    const messageEl = document.getElementById("message");
+    const resultEl = document.getElementById("result");
+
+    const size = 620;
+    const center = size / 2;
+    const radius = 295;
+    const slice = (Math.PI * 2) / names.length;
+
+    let rotation = 0;
+    let spinning = false;
+    let winningIndex = null;
+
+    let audioCtx = null;
+    let tickTimer = null;
+    let spinStartTime = null;
+    let spinDuration = 8000;
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    resizeConfetti();
+    window.addEventListener("resize", resizeConfetti);
+
+    function normalize(a) {
+      const full = Math.PI * 2;
+      return ((a % full) + full) % full;
+    }
+
+    function drawWheel() {
+      wheelCtx.clearRect(0, 0, size, size);
+
+      for (let i = 0; i < names.length; i++) {
+        const start = rotation + i * slice - Math.PI / 2;
+        const end = start + slice;
+        const isWinner = i === winningIndex;
+
+        wheelCtx.save();
+
+        if (isWinner) {
+          wheelCtx.shadowColor = "rgba(250, 204, 21, 0.95)";
+          wheelCtx.shadowBlur = 30;
+        }
+
+        wheelCtx.beginPath();
+        wheelCtx.moveTo(center, center);
+        wheelCtx.arc(center, center, radius, start, end);
+        wheelCtx.closePath();
+        wheelCtx.fillStyle = isWinner ? "#facc15" : colors[i % colors.length];
+        wheelCtx.fill();
+
+        wheelCtx.lineWidth = isWinner ? 4 : 1;
+        wheelCtx.strokeStyle = isWinner ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.35)";
+        wheelCtx.stroke();
+
+        wheelCtx.restore();
+
+        wheelCtx.save();
+        wheelCtx.translate(center, center);
+        wheelCtx.rotate(start + slice / 2);
+        wheelCtx.textAlign = "right";
+        wheelCtx.textBaseline = "middle";
+        wheelCtx.fillStyle = isWinner ? "#111827" : "#1f2937";
+        wheelCtx.font = "bold 14px Arial";
+        wheelCtx.fillText(names[i], radius - 18, 0);
+        wheelCtx.restore();
+      }
+
+      wheelCtx.beginPath();
+      wheelCtx.arc(center, center, 32, 0, Math.PI * 2);
+      wheelCtx.fillStyle = "#f8fafc";
+      wheelCtx.fill();
+
+      wheelCtx.beginPath();
+      wheelCtx.arc(center, center, 10, 0, Math.PI * 2);
+      wheelCtx.fillStyle = "#64748b";
+      wheelCtx.fill();
+    }
+
+    drawWheel();
+
+    function ensureAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+    }
+
+    function playCasinoTick(volume = 0.025) {
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+
+      filter.type = "bandpass";
+      filter.frequency.value = 1500 + Math.random() * 350;
+      filter.Q.value = 5;
+
+      osc.type = "square";
+      osc.frequency.setValueAtTime(850 + Math.random() * 260, now);
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(volume, now + 0.004);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.055);
+    }
+
+    function dynamicTickLoop() {
+      if (!spinning) return;
+
+      const elapsed = performance.now() - spinStartTime;
+      const progress = Math.min(elapsed / spinDuration, 1);
+
+      let interval;
+
+      if (progress < 0.18) {
+        interval = 140 - progress * 300; 
+      } else if (progress < 0.62) {
+        interval = 55;
+      } else {
+        const slowPart = (progress - 0.62) / 0.38;
+        interval = 55 + slowPart * 210;
+      }
+
+      interval = Math.max(45, Math.min(interval, 280));
+
+      const volume = progress > 0.75 ? 0.03 : 0.022;
+      playCasinoTick(volume);
+
+      tickTimer = setTimeout(dynamicTickLoop, interval);
+    }
+
+    function startRouletteSound() {
+      try {
+        ensureAudioContext();
+        if (tickTimer) clearTimeout(tickTimer);
+        dynamicTickLoop();
+      } catch (e) {
+        console.log("Kunne ikke starte lyd:", e);
+      }
+    }
+
+    function stopRouletteSound() {
+      if (tickTimer) {
+        clearTimeout(tickTimer);
+        tickTimer = null;
+      }
+    }
+
+    function playVictorySound() {
+      try {
+        ensureAudioContext();
+
+        const now = audioCtx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+
+        notes.forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, now + i * 0.09);
+
+          gain.gain.setValueAtTime(0.0001, now + i * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.16, now + i * 0.09 + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.09 + 0.23);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(now + i * 0.09);
+          osc.stop(now + i * 0.09 + 0.25);
+        });
+      } catch (e) {
+        console.log("Kunne ikke spille seierslyd:", e);
+      }
+    }
+
+    const confettiPieces = [];
+
+    function launchConfetti() {
+      confettiPieces.length = 0;
+
+      const confettiColors = [
+        "#facc15", "#fde68a", "#ffffff", "#c7e7ff", "#f8d2e2", "#cfeecf"
+      ];
+
+      for (let i = 0; i < 260; i++) {
+        confettiPieces.push({
+          x: Math.random() * confettiCanvas.width,
+          y: -20 - Math.random() * 220,
+          w: 5 + Math.random() * 8,
+          h: 7 + Math.random() * 10,
+          dx: -2.5 + Math.random() * 5,
+          dy: 2 + Math.random() * 5,
+          rot: Math.random() * Math.PI * 2,
+          drot: -0.25 + Math.random() * 0.5,
+          color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+          life: 120 + Math.random() * 45
+        });
+      }
+
+      requestAnimationFrame(animateConfetti);
+    }
+
+    function animateConfetti() {
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      let alive = 0;
+
+      for (const p of confettiPieces) {
+        if (p.life <= 0) continue;
+
+        p.x += p.dx;
+        p.y += p.dy;
+        p.dy += 0.035;
+        p.rot += p.drot;
+        p.life--;
+
+        confettiCtx.save();
+        confettiCtx.translate(p.x, p.y);
+        confettiCtx.rotate(p.rot);
+        confettiCtx.fillStyle = p.color;
+        confettiCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        confettiCtx.restore();
+
+        if (p.y < confettiCanvas.height + 60 && p.life > 0) alive++;
+      }
+
+      if (alive > 0) {
+        requestAnimationFrame(animateConfetti);
+      } else {
+        confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      }
+    }
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function spin() {
+      if (spinning) return;
+
+      spinning = true;
+      spinBtn.disabled = true;
+      messageEl.textContent = "";
+      resultEl.textContent = "";
+      winningIndex = null;
+      drawWheel();
+
+      const chosenIndex = Math.floor(Math.random() * names.length);
+      const winner = names[chosenIndex];
+
+      const target = -chosenIndex * slice - slice / 2;
+
+      let delta = normalize(target) - normalize(rotation);
+      if (delta < 0) delta += Math.PI * 2;
+
+      const final = rotation + delta + 10 * Math.PI * 2;
+
+      spinDuration = 8000;
+      spinStartTime = performance.now();
+      const startRot = rotation;
+
+      startRouletteSound();
+
+      function anim(now) {
+        let t = (now - spinStartTime) / spinDuration;
+        if (t > 1) t = 1;
+
+        rotation = startRot + (final - startRot) * easeOutCubic(t);
+        drawWheel();
+
+        if (t < 1) {
+          requestAnimationFrame(anim);
+        } else {
+          rotation = normalize(final);
+          stopRouletteSound();
+
+          winningIndex = chosenIndex;
+          drawWheel();
+
+          messageEl.textContent = "Vi har en vinner!";
+          resultEl.textContent = winner;
+          playVictorySound();
+          launchConfetti();
+
+          spinning = false;
+          spinBtn.disabled = false;
+        }
+      }
+
+      requestAnimationFrame(anim);
+    }
+
+    spinBtn.addEventListener("click", spin);
+  </script>
+</body>
+</html>
