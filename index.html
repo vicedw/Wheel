@@ -9,13 +9,16 @@
       margin: 0;
       padding: 0;
       min-height: 100%;
-      overflow: hidden;
+      overflow-x: hidden;
       font-family: Arial, sans-serif;
     }
 
     body {
       color: white;
-      background: linear-gradient(to bottom, #040814 0%, #0a1330 48%, #101d45 100%);
+      background:
+        radial-gradient(circle at top left, rgba(126,214,167,0.16), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(140,207,248,0.16), transparent 34%),
+        linear-gradient(to bottom, #040814 0%, #0a1330 48%, #101d45 100%);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -32,7 +35,7 @@
 
     h1 {
       margin: 0 0 18px;
-      font-size: 34px;
+      font-size: 36px;
       letter-spacing: 0.5px;
       text-shadow: 0 0 14px rgba(255,255,255,0.18);
     }
@@ -42,7 +45,7 @@
       justify-content: center;
       align-items: flex-start;
       gap: 28px;
-      max-width: 1120px;
+      max-width: 1160px;
       margin: 0 auto;
     }
 
@@ -88,19 +91,24 @@
       flex-wrap: wrap;
     }
 
-    button {
-      padding: 13px 28px;
+    button, .file-label {
+      padding: 13px 24px;
       border-radius: 999px;
       border: none;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: bold;
       color: #1f2937;
       background: linear-gradient(135deg, #7ed6a7, #8ccff8);
       cursor: pointer;
       box-shadow: 0 8px 22px rgba(0,0,0,0.28);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-decoration: none;
     }
 
-    button.secondary {
+    button.secondary, .file-label.secondary {
       background: rgba(248, 250, 252, 0.92);
     }
 
@@ -111,6 +119,10 @@
     button:disabled {
       opacity: 0.72;
       cursor: default;
+    }
+
+    input[type="file"] {
+      display: none;
     }
 
     .message {
@@ -133,11 +145,11 @@
     }
 
     .side-panel {
-      width: 300px;
+      width: 330px;
       max-width: 92vw;
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 22px;
+      border-radius: 24px;
       padding: 18px;
       box-sizing: border-box;
       box-shadow: 0 12px 30px rgba(0,0,0,0.24);
@@ -145,33 +157,122 @@
       text-align: left;
     }
 
-    .side-panel label {
-      display: block;
-      font-size: 22px;
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .panel-title h2 {
+      margin: 0;
+      font-size: 23px;
       font-weight: 900;
-      margin-bottom: 8px;
-      color: #ffffff;
+    }
+
+    .counter {
+      font-size: 14px;
+      color: #facc15;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
     .hint {
       font-size: 13px;
       line-height: 1.35;
       color: rgba(255,255,255,0.76);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
-    textarea {
-      width: 100%;
-      min-height: 230px;
-      border-radius: 15px;
-      border: none;
-      padding: 12px;
-      font-size: 16px;
-      resize: vertical;
+    .done-list {
+      min-height: 260px;
+      max-height: 380px;
+      overflow-y: auto;
+      background: rgba(255,255,255,0.92);
+      border-radius: 16px;
+      padding: 10px;
       box-sizing: border-box;
+      color: #111827;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+    }
+
+    .empty-state {
+      color: #64748b;
+      font-size: 15px;
+      padding: 10px;
+      line-height: 1.35;
+    }
+
+    .done-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 10px;
+      margin-bottom: 7px;
+      border-radius: 12px;
+      background: #f8fafc;
+      box-shadow: 0 1px 4px rgba(15,23,42,0.10);
+      animation: popIn 240ms ease-out;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .done-name {
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .done-number {
+      color: #64748b;
+      font-weight: 800;
+      margin-right: 6px;
+    }
+
+    .remove-btn {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 50%;
+      box-shadow: none;
+      background: #e2e8f0;
+      color: #334155;
+      font-size: 18px;
+      line-height: 1;
+      flex: 0 0 auto;
+    }
+
+    .manual-add {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+    }
+
+    select {
+      min-width: 0;
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 11px 13px;
+      font-size: 14px;
       background: rgba(255,255,255,0.93);
       color: #111827;
+    }
+
+    .manual-add button {
+      padding: 11px 15px;
+      font-size: 14px;
+      box-shadow: 0 5px 14px rgba(0,0,0,0.18);
     }
 
     .small-controls {
@@ -181,9 +282,9 @@
       flex-wrap: wrap;
     }
 
-    .small-controls button {
+    .small-controls button, .small-controls .file-label {
       font-size: 13px;
-      padding: 9px 13px;
+      padding: 9px 12px;
       box-shadow: 0 5px 14px rgba(0,0,0,0.18);
     }
 
@@ -201,9 +302,9 @@
       z-index: 1;
     }
 
-    @media (max-width: 960px) {
+    @media (max-width: 980px) {
       body {
-        overflow: auto;
+        overflow-y: auto;
         align-items: flex-start;
       }
 
@@ -216,8 +317,9 @@
         width: 620px;
       }
 
-      textarea {
-        min-height: 140px;
+      .done-list {
+        min-height: 150px;
+        max-height: 260px;
       }
     }
   </style>
@@ -245,16 +347,28 @@
       </div>
 
       <div class="side-panel">
-        <label for="doneNames">Gjennomført</label>
-        <div class="hint">
-          Skriv navn som allerede er trukket her, ett navn per linje.
-          Vinneren legges automatisk til etter hver trekning.
+        <div class="panel-title">
+          <h2>Gjennomført</h2>
+          <div class="counter" id="counter"></div>
         </div>
-        <textarea id="doneNames" placeholder="Eksempel:&#10;Jan-Inge&#10;Tina"></textarea>
+
+        <div class="hint">
+          Vinneren flyttes hit automatisk. Klikk på × for å legge et navn tilbake i hjulet.
+        </div>
+
+        <div class="done-list" id="doneList"></div>
+
+        <div class="manual-add">
+          <select id="manualSelect"></select>
+          <button id="manualAddBtn" type="button">Legg til</button>
+        </div>
 
         <div class="small-controls">
           <button class="secondary" id="undoBtn" type="button">Angre siste</button>
-          <button class="warning" id="clearBtn" type="button">Tøm listen</button>
+          <button class="warning" id="newRoundBtn" type="button">Start ny runde</button>
+          <button class="secondary" id="exportBtn" type="button">Eksporter</button>
+          <label class="file-label secondary" for="importFile">Importer</label>
+          <input id="importFile" type="file" accept=".json,application/json">
         </div>
 
         <div class="status" id="status"></div>
@@ -285,22 +399,29 @@
 
     const spinBtn = document.getElementById("spinBtn");
     const undoBtn = document.getElementById("undoBtn");
-    const clearBtn = document.getElementById("clearBtn");
+    const newRoundBtn = document.getElementById("newRoundBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const importFile = document.getElementById("importFile");
+    const manualSelect = document.getElementById("manualSelect");
+    const manualAddBtn = document.getElementById("manualAddBtn");
+
     const messageEl = document.getElementById("message");
     const resultEl = document.getElementById("result");
-    const doneNamesEl = document.getElementById("doneNames");
+    const doneListEl = document.getElementById("doneList");
     const statusEl = document.getElementById("status");
+    const counterEl = document.getElementById("counter");
 
     const size = 620;
     const center = size / 2;
     const radius = 295;
     const slice = (Math.PI * 2) / names.length;
-    const storageKey = "lykkehjul-gjennomfort-v2";
+    const storageKey = "lykkehjul-gjennomfort-v3";
 
     let rotation = 0;
     let spinning = false;
     let winningIndex = null;
-    let lastAutoAddedName = null;
+    let completed = [];
+    let history = [];
 
     let audioCtx = null;
     let tickTimer = null;
@@ -321,66 +442,164 @@
     }
 
     function normalizeName(name) {
-      return name.trim().toLowerCase();
+      return String(name).trim().toLowerCase();
     }
 
-    function getCompletedNames() {
-      return doneNamesEl.value
-        .split(/\n|,/)
-        .map(n => n.trim())
-        .filter(Boolean);
+    function completedSet() {
+      return new Set(completed.map(normalizeName));
     }
 
-    function getCompletedSet() {
-      return new Set(getCompletedNames().map(normalizeName));
+    function saveState() {
+      localStorage.setItem(storageKey, JSON.stringify({
+        completed,
+        history
+      }));
     }
 
-    function saveCompleted() {
-      localStorage.setItem(storageKey, doneNamesEl.value);
-      updateStatus();
-      drawWheel();
-    }
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return;
 
-    function loadCompleted() {
-      doneNamesEl.value = localStorage.getItem(storageKey) || "";
-      updateStatus();
-    }
-
-    function updateStatus() {
-      const completedSet = getCompletedSet();
-      const completedCount = names.filter(name => completedSet.has(normalizeName(name))).length;
-      const remainingCount = names.length - completedCount;
-
-      statusEl.textContent =
-        completedCount + " gjennomført · " +
-        remainingCount + " igjen";
-
-      spinBtn.disabled = spinning || remainingCount === 0;
-    }
-
-    function addCompletedName(name) {
-      const existing = getCompletedSet();
-
-      if (!existing.has(normalizeName(name))) {
-        const current = doneNamesEl.value.trim();
-        doneNamesEl.value = current ? current + "\n" + name : name;
-        lastAutoAddedName = name;
-        saveCompleted();
+        const data = JSON.parse(raw);
+        if (Array.isArray(data.completed)) {
+          completed = data.completed.filter(name => names.map(normalizeName).includes(normalizeName(name)));
+        }
+        if (Array.isArray(data.history)) {
+          history = data.history.filter(name => names.map(normalizeName).includes(normalizeName(name)));
+        }
+      } catch (e) {
+        completed = [];
+        history = [];
       }
     }
 
-    function removeCompletedName(name) {
+    function getRemainingIndexes() {
+      const set = completedSet();
+
+      return names
+        .map((name, index) => ({ name, index }))
+        .filter(item => !set.has(normalizeName(item.name)))
+        .map(item => item.index);
+    }
+
+    function addCompleted(name, fromSpin = false) {
+      const set = completedSet();
+
+      if (!set.has(normalizeName(name))) {
+        completed.push(name);
+        if (fromSpin) history.push(name);
+        saveState();
+        renderAll();
+      }
+    }
+
+    function removeCompleted(name) {
       const target = normalizeName(name);
+      completed = completed.filter(item => normalizeName(item) !== target);
+      history = history.filter(item => normalizeName(item) !== target);
+      saveState();
+      winningIndex = null;
+      renderAll();
+    }
 
-      const updated = getCompletedNames()
-        .filter(item => normalizeName(item) !== target);
+    function renderDoneList() {
+      doneListEl.innerHTML = "";
 
-      doneNamesEl.value = updated.join("\n");
-      saveCompleted();
+      if (completed.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "Ingen navn er gjennomført ennå.";
+        doneListEl.appendChild(empty);
+        return;
+      }
+
+      completed.forEach((name, index) => {
+        const item = document.createElement("div");
+        item.className = "done-item";
+
+        const left = document.createElement("div");
+        left.className = "done-name";
+
+        const number = document.createElement("span");
+        number.className = "done-number";
+        number.textContent = (index + 1) + ".";
+
+        const label = document.createElement("span");
+        label.textContent = name;
+
+        left.appendChild(number);
+        left.appendChild(label);
+
+        const remove = document.createElement("button");
+        remove.className = "remove-btn";
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.title = "Legg tilbake i hjulet";
+        remove.addEventListener("click", function () {
+          removeCompleted(name);
+          messageEl.textContent = name + " er lagt tilbake i hjulet.";
+          resultEl.textContent = "";
+        });
+
+        item.appendChild(left);
+        item.appendChild(remove);
+        doneListEl.appendChild(item);
+      });
+    }
+
+    function renderManualSelect() {
+      const set = completedSet();
+      const remaining = names.filter(name => !set.has(normalizeName(name)));
+
+      manualSelect.innerHTML = "";
+
+      if (remaining.length === 0) {
+        const option = document.createElement("option");
+        option.textContent = "Alle er gjennomført";
+        option.value = "";
+        manualSelect.appendChild(option);
+        manualSelect.disabled = true;
+        manualAddBtn.disabled = true;
+        return;
+      }
+
+      remaining.forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        manualSelect.appendChild(option);
+      });
+
+      manualSelect.disabled = false;
+      manualAddBtn.disabled = false;
+    }
+
+    function renderStatus() {
+      const done = completed.length;
+      const remaining = names.length - done;
+
+      counterEl.textContent = remaining + " av " + names.length + " igjen";
+
+      statusEl.textContent =
+        done + " gjennomført · " +
+        remaining + " igjen" +
+        (history.length ? " · siste: " + history[history.length - 1] : "");
+
+      spinBtn.disabled = spinning || remaining === 0;
+      undoBtn.disabled = spinning || history.length === 0;
+      newRoundBtn.disabled = spinning || completed.length === 0;
+    }
+
+    function renderAll() {
+      renderDoneList();
+      renderManualSelect();
+      renderStatus();
+      drawWheel();
     }
 
     function drawWheel() {
-      const completedSet = getCompletedSet();
+      const set = completedSet();
 
       wheelCtx.clearRect(0, 0, size, size);
 
@@ -388,7 +607,7 @@
         const start = rotation + i * slice - Math.PI / 2;
         const end = start + slice;
         const isWinner = i === winningIndex;
-        const isCompleted = completedSet.has(normalizeName(names[i]));
+        const isCompleted = set.has(normalizeName(names[i]));
 
         wheelCtx.save();
 
@@ -405,7 +624,7 @@
         if (isWinner) {
           wheelCtx.fillStyle = "#facc15";
         } else if (isCompleted) {
-          wheelCtx.fillStyle = "rgba(148, 163, 184, 0.55)";
+          wheelCtx.fillStyle = "rgba(148, 163, 184, 0.50)";
         } else {
           wheelCtx.fillStyle = colors[i % colors.length];
         }
@@ -423,12 +642,12 @@
         wheelCtx.rotate(start + slice / 2);
         wheelCtx.textAlign = "right";
         wheelCtx.textBaseline = "middle";
-        wheelCtx.fillStyle = isWinner ? "#111827" : isCompleted ? "rgba(17,24,39,0.50)" : "#1f2937";
+        wheelCtx.fillStyle = isWinner ? "#111827" : isCompleted ? "rgba(17,24,39,0.45)" : "#1f2937";
         wheelCtx.font = isCompleted ? "bold 13px Arial" : "bold 14px Arial";
         wheelCtx.fillText(names[i], radius - 18, 0);
 
         if (isCompleted && !isWinner) {
-          wheelCtx.strokeStyle = "rgba(17,24,39,0.38)";
+          wheelCtx.strokeStyle = "rgba(17,24,39,0.35)";
           wheelCtx.lineWidth = 2;
           wheelCtx.beginPath();
           wheelCtx.moveTo(radius - 120, 0);
@@ -440,12 +659,12 @@
       }
 
       wheelCtx.beginPath();
-      wheelCtx.arc(center, center, 32, 0, Math.PI * 2);
+      wheelCtx.arc(center, center, 34, 0, Math.PI * 2);
       wheelCtx.fillStyle = "#f8fafc";
       wheelCtx.fill();
 
       wheelCtx.beginPath();
-      wheelCtx.arc(center, center, 10, 0, Math.PI * 2);
+      wheelCtx.arc(center, center, 11, 0, Math.PI * 2);
       wheelCtx.fillStyle = "#64748b";
       wheelCtx.fill();
     }
@@ -621,17 +840,12 @@
     function spin() {
       if (spinning) return;
 
-      const completedSet = getCompletedSet();
-
-      const availableIndexes = names
-        .map((name, index) => ({ name, index }))
-        .filter(item => !completedSet.has(normalizeName(item.name)))
-        .map(item => item.index);
+      const availableIndexes = getRemainingIndexes();
 
       if (availableIndexes.length === 0) {
         messageEl.textContent = "Alle er gjennomført!";
         resultEl.textContent = "";
-        updateStatus();
+        renderStatus();
         return;
       }
 
@@ -679,52 +893,116 @@
           playVictorySound();
           launchConfetti();
 
-          addCompletedName(winner);
+          addCompleted(winner, true);
 
           spinning = false;
-          updateStatus();
+          renderAll();
         }
       }
 
       requestAnimationFrame(anim);
     }
 
-    spinBtn.addEventListener("click", spin);
+    function undoLast() {
+      if (spinning || history.length === 0) return;
 
-    doneNamesEl.addEventListener("input", function () {
-      lastAutoAddedName = null;
-      saveCompleted();
-    });
+      const last = history.pop();
+      completed = completed.filter(name => normalizeName(name) !== normalizeName(last));
+      saveState();
 
-    undoBtn.addEventListener("click", function () {
-      if (!lastAutoAddedName) {
-        messageEl.textContent = "Ingen automatisk trekning å angre.";
-        resultEl.textContent = "";
-        return;
-      }
-
-      removeCompletedName(lastAutoAddedName);
+      winningIndex = null;
       messageEl.textContent = "Siste trekning er angret.";
-      resultEl.textContent = lastAutoAddedName;
-      winningIndex = null;
-      lastAutoAddedName = null;
-      drawWheel();
-    });
+      resultEl.textContent = last;
+      renderAll();
+    }
 
-    clearBtn.addEventListener("click", function () {
-      if (spinning) return;
+    function startNewRound() {
+      if (spinning || completed.length === 0) return;
 
-      doneNamesEl.value = "";
-      lastAutoAddedName = null;
+      const ok = confirm("Vil du starte en ny runde og tømme Gjennomført-listen?");
+      if (!ok) return;
+
+      completed = [];
+      history = [];
       winningIndex = null;
-      messageEl.textContent = "Listen er tømt.";
+      messageEl.textContent = "Ny runde er startet.";
       resultEl.textContent = "";
-      saveCompleted();
-      drawWheel();
+      saveState();
+      renderAll();
+    }
+
+    function exportList() {
+      const data = {
+        exportedAt: new Date().toISOString(),
+        completed
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "gjennomfort-lykkehjul.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      URL.revokeObjectURL(url);
+    }
+
+    function importList(file) {
+      const reader = new FileReader();
+
+      reader.onload = function () {
+        try {
+          const data = JSON.parse(reader.result);
+          const imported = Array.isArray(data.completed) ? data.completed : [];
+
+          const validNames = names.map(normalizeName);
+          completed = imported
+            .filter(name => validNames.includes(normalizeName(name)))
+            .filter((name, index, arr) => arr.findIndex(other => normalizeName(other) === normalizeName(name)) === index);
+
+          history = [];
+          winningIndex = null;
+          saveState();
+          renderAll();
+
+          messageEl.textContent = "Listen er importert.";
+          resultEl.textContent = "";
+        } catch (e) {
+          messageEl.textContent = "Kunne ikke importere filen.";
+          resultEl.textContent = "";
+        }
+      };
+
+      reader.readAsText(file);
+    }
+
+    spinBtn.addEventListener("click", spin);
+    undoBtn.addEventListener("click", undoLast);
+    newRoundBtn.addEventListener("click", startNewRound);
+    exportBtn.addEventListener("click", exportList);
+
+    manualAddBtn.addEventListener("click", function () {
+      const name = manualSelect.value;
+      if (!name) return;
+
+      addCompleted(name, false);
+      winningIndex = null;
+      messageEl.textContent = name + " er lagt til i Gjennomført.";
+      resultEl.textContent = "";
     });
 
-    loadCompleted();
-    drawWheel();
+    importFile.addEventListener("change", function () {
+      if (importFile.files && importFile.files[0]) {
+        importList(importFile.files[0]);
+        importFile.value = "";
+      }
+    });
+
+    loadState();
+    renderAll();
   </script>
 </body>
 </html>
