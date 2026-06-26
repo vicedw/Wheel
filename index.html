@@ -26,12 +26,34 @@
       position: relative;
       z-index: 2;
       padding: 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: 34px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 14px rgba(255,255,255,0.18);
+    }
+
+    .main-layout {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 28px;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .wheel-section {
+      min-width: 0;
     }
 
     .wheel-wrap {
       position: relative;
       width: 620px;
-      max-width: 94vw;
+      max-width: 92vw;
       margin: 0 auto;
     }
 
@@ -58,17 +80,32 @@
       filter: drop-shadow(0 0 8px rgba(255,255,255,0.45));
     }
 
+    .controls {
+      margin-top: 22px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
     button {
-      margin-top: 24px;
-      padding: 14px 34px;
+      padding: 13px 28px;
       border-radius: 999px;
       border: none;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: bold;
       color: #1f2937;
       background: linear-gradient(135deg, #7ed6a7, #8ccff8);
       cursor: pointer;
       box-shadow: 0 8px 22px rgba(0,0,0,0.28);
+    }
+
+    button.secondary {
+      background: rgba(248, 250, 252, 0.92);
+    }
+
+    button.warning {
+      background: linear-gradient(135deg, #fde68a, #fca5a5);
     }
 
     button:disabled {
@@ -77,10 +114,10 @@
     }
 
     .message {
-      margin-top: 22px;
-      font-size: 34px;
+      margin-top: 18px;
+      font-size: 31px;
       font-weight: 800;
-      min-height: 44px;
+      min-height: 40px;
       color: #ffffff;
       text-shadow: 0 0 14px rgba(255,255,255,0.25);
     }
@@ -95,11 +132,93 @@
         0 0 20px rgba(250,204,21,0.35);
     }
 
+    .side-panel {
+      width: 300px;
+      max-width: 92vw;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 22px;
+      padding: 18px;
+      box-sizing: border-box;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.24);
+      backdrop-filter: blur(8px);
+      text-align: left;
+    }
+
+    .side-panel label {
+      display: block;
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+
+    .hint {
+      font-size: 13px;
+      line-height: 1.35;
+      color: rgba(255,255,255,0.76);
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 230px;
+      border-radius: 15px;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+      resize: vertical;
+      box-sizing: border-box;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.93);
+      color: #111827;
+    }
+
+    .small-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .small-controls button {
+      font-size: 13px;
+      padding: 9px 13px;
+      box-shadow: 0 5px 14px rgba(0,0,0,0.18);
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.78);
+      line-height: 1.35;
+    }
+
     #confetti {
       position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: 1;
+    }
+
+    @media (max-width: 960px) {
+      body {
+        overflow: auto;
+        align-items: flex-start;
+      }
+
+      .main-layout {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .side-panel {
+        width: 620px;
+      }
+
+      textarea {
+        min-height: 140px;
+      }
     }
   </style>
 </head>
@@ -108,14 +227,39 @@
   <canvas id="confetti"></canvas>
 
   <div class="container">
-    <div class="wheel-wrap">
-      <div class="pointer"></div>
-      <canvas id="wheel" width="620" height="620"></canvas>
-    </div>
+    <h1>Lykkehjul</h1>
 
-    <button id="spinBtn">Snurr</button>
-    <div class="message" id="message"></div>
-    <div class="result" id="result"></div>
+    <div class="main-layout">
+      <div class="wheel-section">
+        <div class="wheel-wrap">
+          <div class="pointer"></div>
+          <canvas id="wheel" width="620" height="620"></canvas>
+        </div>
+
+        <div class="controls">
+          <button id="spinBtn">Snurr</button>
+        </div>
+
+        <div class="message" id="message"></div>
+        <div class="result" id="result"></div>
+      </div>
+
+      <div class="side-panel">
+        <label for="doneNames">Gjennomført</label>
+        <div class="hint">
+          Skriv navn som allerede er trukket her, ett navn per linje.
+          Vinneren legges automatisk til etter hver trekning.
+        </div>
+        <textarea id="doneNames" placeholder="Eksempel:&#10;Jan-Inge&#10;Tina"></textarea>
+
+        <div class="small-controls">
+          <button class="secondary" id="undoBtn" type="button">Angre siste</button>
+          <button class="warning" id="clearBtn" type="button">Tøm listen</button>
+        </div>
+
+        <div class="status" id="status"></div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -140,22 +284,28 @@
     const confettiCtx = confettiCanvas.getContext("2d");
 
     const spinBtn = document.getElementById("spinBtn");
+    const undoBtn = document.getElementById("undoBtn");
+    const clearBtn = document.getElementById("clearBtn");
     const messageEl = document.getElementById("message");
     const resultEl = document.getElementById("result");
+    const doneNamesEl = document.getElementById("doneNames");
+    const statusEl = document.getElementById("status");
 
     const size = 620;
     const center = size / 2;
     const radius = 295;
     const slice = (Math.PI * 2) / names.length;
+    const storageKey = "lykkehjul-gjennomfort-v2";
 
     let rotation = 0;
     let spinning = false;
     let winningIndex = null;
+    let lastAutoAddedName = null;
 
     let audioCtx = null;
     let tickTimer = null;
     let spinStartTime = null;
-    let spinDuration = 8000;
+    let spinDuration = 5000;
 
     function resizeConfetti() {
       confettiCanvas.width = window.innerWidth;
@@ -170,13 +320,75 @@
       return ((a % full) + full) % full;
     }
 
+    function normalizeName(name) {
+      return name.trim().toLowerCase();
+    }
+
+    function getCompletedNames() {
+      return doneNamesEl.value
+        .split(/\n|,/)
+        .map(n => n.trim())
+        .filter(Boolean);
+    }
+
+    function getCompletedSet() {
+      return new Set(getCompletedNames().map(normalizeName));
+    }
+
+    function saveCompleted() {
+      localStorage.setItem(storageKey, doneNamesEl.value);
+      updateStatus();
+      drawWheel();
+    }
+
+    function loadCompleted() {
+      doneNamesEl.value = localStorage.getItem(storageKey) || "";
+      updateStatus();
+    }
+
+    function updateStatus() {
+      const completedSet = getCompletedSet();
+      const completedCount = names.filter(name => completedSet.has(normalizeName(name))).length;
+      const remainingCount = names.length - completedCount;
+
+      statusEl.textContent =
+        completedCount + " gjennomført · " +
+        remainingCount + " igjen";
+
+      spinBtn.disabled = spinning || remainingCount === 0;
+    }
+
+    function addCompletedName(name) {
+      const existing = getCompletedSet();
+
+      if (!existing.has(normalizeName(name))) {
+        const current = doneNamesEl.value.trim();
+        doneNamesEl.value = current ? current + "\n" + name : name;
+        lastAutoAddedName = name;
+        saveCompleted();
+      }
+    }
+
+    function removeCompletedName(name) {
+      const target = normalizeName(name);
+
+      const updated = getCompletedNames()
+        .filter(item => normalizeName(item) !== target);
+
+      doneNamesEl.value = updated.join("\n");
+      saveCompleted();
+    }
+
     function drawWheel() {
+      const completedSet = getCompletedSet();
+
       wheelCtx.clearRect(0, 0, size, size);
 
       for (let i = 0; i < names.length; i++) {
         const start = rotation + i * slice - Math.PI / 2;
         const end = start + slice;
         const isWinner = i === winningIndex;
+        const isCompleted = completedSet.has(normalizeName(names[i]));
 
         wheelCtx.save();
 
@@ -189,7 +401,15 @@
         wheelCtx.moveTo(center, center);
         wheelCtx.arc(center, center, radius, start, end);
         wheelCtx.closePath();
-        wheelCtx.fillStyle = isWinner ? "#facc15" : colors[i % colors.length];
+
+        if (isWinner) {
+          wheelCtx.fillStyle = "#facc15";
+        } else if (isCompleted) {
+          wheelCtx.fillStyle = "rgba(148, 163, 184, 0.55)";
+        } else {
+          wheelCtx.fillStyle = colors[i % colors.length];
+        }
+
         wheelCtx.fill();
 
         wheelCtx.lineWidth = isWinner ? 4 : 1;
@@ -203,9 +423,19 @@
         wheelCtx.rotate(start + slice / 2);
         wheelCtx.textAlign = "right";
         wheelCtx.textBaseline = "middle";
-        wheelCtx.fillStyle = isWinner ? "#111827" : "#1f2937";
-        wheelCtx.font = "bold 14px Arial";
+        wheelCtx.fillStyle = isWinner ? "#111827" : isCompleted ? "rgba(17,24,39,0.50)" : "#1f2937";
+        wheelCtx.font = isCompleted ? "bold 13px Arial" : "bold 14px Arial";
         wheelCtx.fillText(names[i], radius - 18, 0);
+
+        if (isCompleted && !isWinner) {
+          wheelCtx.strokeStyle = "rgba(17,24,39,0.38)";
+          wheelCtx.lineWidth = 2;
+          wheelCtx.beginPath();
+          wheelCtx.moveTo(radius - 120, 0);
+          wheelCtx.lineTo(radius - 16, 0);
+          wheelCtx.stroke();
+        }
+
         wheelCtx.restore();
       }
 
@@ -219,8 +449,6 @@
       wheelCtx.fillStyle = "#64748b";
       wheelCtx.fill();
     }
-
-    drawWheel();
 
     function ensureAudioContext() {
       if (!audioCtx) {
@@ -267,7 +495,7 @@
       let interval;
 
       if (progress < 0.18) {
-        interval = 140 - progress * 300; 
+        interval = 140 - progress * 300;
       } else if (progress < 0.62) {
         interval = 55;
       } else {
@@ -393,6 +621,20 @@
     function spin() {
       if (spinning) return;
 
+      const completedSet = getCompletedSet();
+
+      const availableIndexes = names
+        .map((name, index) => ({ name, index }))
+        .filter(item => !completedSet.has(normalizeName(item.name)))
+        .map(item => item.index);
+
+      if (availableIndexes.length === 0) {
+        messageEl.textContent = "Alle er gjennomført!";
+        resultEl.textContent = "";
+        updateStatus();
+        return;
+      }
+
       spinning = true;
       spinBtn.disabled = true;
       messageEl.textContent = "";
@@ -400,7 +642,7 @@
       winningIndex = null;
       drawWheel();
 
-      const chosenIndex = Math.floor(Math.random() * names.length);
+      const chosenIndex = availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
       const winner = names[chosenIndex];
 
       const target = -chosenIndex * slice - slice / 2;
@@ -408,9 +650,9 @@
       let delta = normalize(target) - normalize(rotation);
       if (delta < 0) delta += Math.PI * 2;
 
-      const final = rotation + delta + 10 * Math.PI * 2;
+      const final = rotation + delta + 8 * Math.PI * 2;
 
-      spinDuration = 8000;
+      spinDuration = 5000;
       spinStartTime = performance.now();
       const startRot = rotation;
 
@@ -437,8 +679,10 @@
           playVictorySound();
           launchConfetti();
 
+          addCompletedName(winner);
+
           spinning = false;
-          spinBtn.disabled = false;
+          updateStatus();
         }
       }
 
@@ -446,6 +690,41 @@
     }
 
     spinBtn.addEventListener("click", spin);
+
+    doneNamesEl.addEventListener("input", function () {
+      lastAutoAddedName = null;
+      saveCompleted();
+    });
+
+    undoBtn.addEventListener("click", function () {
+      if (!lastAutoAddedName) {
+        messageEl.textContent = "Ingen automatisk trekning å angre.";
+        resultEl.textContent = "";
+        return;
+      }
+
+      removeCompletedName(lastAutoAddedName);
+      messageEl.textContent = "Siste trekning er angret.";
+      resultEl.textContent = lastAutoAddedName;
+      winningIndex = null;
+      lastAutoAddedName = null;
+      drawWheel();
+    });
+
+    clearBtn.addEventListener("click", function () {
+      if (spinning) return;
+
+      doneNamesEl.value = "";
+      lastAutoAddedName = null;
+      winningIndex = null;
+      messageEl.textContent = "Listen er tømt.";
+      resultEl.textContent = "";
+      saveCompleted();
+      drawWheel();
+    });
+
+    loadCompleted();
+    drawWheel();
   </script>
 </body>
 </html>
