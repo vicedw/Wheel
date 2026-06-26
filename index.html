@@ -145,7 +145,7 @@
     }
 
     .side-panel {
-      width: 330px;
+      width: 340px;
       max-width: 92vw;
       background: rgba(255,255,255,0.08);
       border: 1px solid rgba(255,255,255,0.18);
@@ -185,9 +185,9 @@
       margin-bottom: 12px;
     }
 
-    .done-list {
-      min-height: 260px;
-      max-height: 380px;
+    .check-list {
+      min-height: 300px;
+      max-height: 430px;
       overflow-y: auto;
       background: rgba(255,255,255,0.92);
       border-radius: 16px;
@@ -197,82 +197,64 @@
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
     }
 
-    .empty-state {
-      color: #64748b;
-      font-size: 15px;
-      padding: 10px;
-      line-height: 1.35;
-    }
-
-    .done-item {
+    .check-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 9px 10px;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 11px;
       margin-bottom: 7px;
-      border-radius: 12px;
+      border: none;
+      border-radius: 13px;
       background: #f8fafc;
+      color: #111827;
       box-shadow: 0 1px 4px rgba(15,23,42,0.10);
-      animation: popIn 240ms ease-out;
-    }
-
-    @keyframes popIn {
-      from {
-        opacity: 0;
-        transform: translateY(-6px) scale(0.98);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    .done-name {
-      font-weight: 800;
+      cursor: pointer;
+      text-align: left;
       font-size: 15px;
-    }
-
-    .done-number {
-      color: #64748b;
       font-weight: 800;
-      margin-right: 6px;
+      transition: transform 120ms ease, background 120ms ease, opacity 120ms ease;
     }
 
-    .remove-btn {
-      width: 28px;
-      height: 28px;
-      padding: 0;
-      border-radius: 50%;
-      box-shadow: none;
-      background: #e2e8f0;
-      color: #334155;
-      font-size: 18px;
-      line-height: 1;
+    .check-item:hover {
+      transform: translateY(-1px);
+      background: #eef6ff;
+    }
+
+    .check-item.done {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .check-item.done .name-text {
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: rgba(22,101,52,0.45);
+    }
+
+    .check-icon {
+      width: 23px;
+      height: 23px;
+      border-radius: 7px;
+      border: 2px solid #94a3b8;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      font-weight: 900;
+      color: transparent;
+      background: white;
       flex: 0 0 auto;
     }
 
-    .manual-add {
-      margin-top: 12px;
-      display: flex;
-      gap: 8px;
+    .check-item.done .check-icon {
+      border-color: #22c55e;
+      background: #22c55e;
+      color: white;
     }
 
-    select {
-      min-width: 0;
+    .name-text {
       flex: 1;
-      border: none;
-      border-radius: 999px;
-      padding: 11px 13px;
-      font-size: 14px;
-      background: rgba(255,255,255,0.93);
-      color: #111827;
-    }
-
-    .manual-add button {
-      padding: 11px 15px;
-      font-size: 14px;
-      box-shadow: 0 5px 14px rgba(0,0,0,0.18);
     }
 
     .small-controls {
@@ -317,9 +299,9 @@
         width: 620px;
       }
 
-      .done-list {
+      .check-list {
         min-height: 150px;
-        max-height: 260px;
+        max-height: 300px;
       }
     }
   </style>
@@ -353,15 +335,10 @@
         </div>
 
         <div class="hint">
-          Vinneren flyttes hit automatisk. Klikk på × for å legge et navn tilbake i hjulet.
+          Klikk på navn som allerede er trukket. Klikk igjen for å legge personen tilbake i hjulet.
         </div>
 
-        <div class="done-list" id="doneList"></div>
-
-        <div class="manual-add">
-          <select id="manualSelect"></select>
-          <button id="manualAddBtn" type="button">Legg til</button>
-        </div>
+        <div class="check-list" id="checkList"></div>
 
         <div class="small-controls">
           <button class="secondary" id="undoBtn" type="button">Angre siste</button>
@@ -402,12 +379,10 @@
     const newRoundBtn = document.getElementById("newRoundBtn");
     const exportBtn = document.getElementById("exportBtn");
     const importFile = document.getElementById("importFile");
-    const manualSelect = document.getElementById("manualSelect");
-    const manualAddBtn = document.getElementById("manualAddBtn");
 
     const messageEl = document.getElementById("message");
     const resultEl = document.getElementById("result");
-    const doneListEl = document.getElementById("doneList");
+    const checkListEl = document.getElementById("checkList");
     const statusEl = document.getElementById("status");
     const counterEl = document.getElementById("counter");
 
@@ -415,7 +390,7 @@
     const center = size / 2;
     const radius = 295;
     const slice = (Math.PI * 2) / names.length;
-    const storageKey = "lykkehjul-gjennomfort-v3";
+    const storageKey = "lykkehjul-gjennomfort-sjekkliste-v1";
 
     let rotation = 0;
     let spinning = false;
@@ -462,11 +437,16 @@
         if (!raw) return;
 
         const data = JSON.parse(raw);
+        const validNames = names.map(normalizeName);
+
         if (Array.isArray(data.completed)) {
-          completed = data.completed.filter(name => names.map(normalizeName).includes(normalizeName(name)));
+          completed = data.completed
+            .filter(name => validNames.includes(normalizeName(name)))
+            .filter((name, index, arr) => arr.findIndex(other => normalizeName(other) === normalizeName(name)) === index);
         }
+
         if (Array.isArray(data.history)) {
-          history = data.history.filter(name => names.map(normalizeName).includes(normalizeName(name)));
+          history = data.history.filter(name => validNames.includes(normalizeName(name)));
         }
       } catch (e) {
         completed = [];
@@ -503,76 +483,47 @@
       renderAll();
     }
 
-    function renderDoneList() {
-      doneListEl.innerHTML = "";
+    function toggleCompleted(name) {
+      if (spinning) return;
 
-      if (completed.length === 0) {
-        const empty = document.createElement("div");
-        empty.className = "empty-state";
-        empty.textContent = "Ingen navn er gjennomført ennå.";
-        doneListEl.appendChild(empty);
-        return;
+      const set = completedSet();
+
+      if (set.has(normalizeName(name))) {
+        removeCompleted(name);
+        messageEl.textContent = name + " er lagt tilbake i hjulet.";
+        resultEl.textContent = "";
+      } else {
+        addCompleted(name, false);
+        winningIndex = null;
+        messageEl.textContent = name + " er markert som gjennomført.";
+        resultEl.textContent = "";
       }
-
-      completed.forEach((name, index) => {
-        const item = document.createElement("div");
-        item.className = "done-item";
-
-        const left = document.createElement("div");
-        left.className = "done-name";
-
-        const number = document.createElement("span");
-        number.className = "done-number";
-        number.textContent = (index + 1) + ".";
-
-        const label = document.createElement("span");
-        label.textContent = name;
-
-        left.appendChild(number);
-        left.appendChild(label);
-
-        const remove = document.createElement("button");
-        remove.className = "remove-btn";
-        remove.type = "button";
-        remove.textContent = "×";
-        remove.title = "Legg tilbake i hjulet";
-        remove.addEventListener("click", function () {
-          removeCompleted(name);
-          messageEl.textContent = name + " er lagt tilbake i hjulet.";
-          resultEl.textContent = "";
-        });
-
-        item.appendChild(left);
-        item.appendChild(remove);
-        doneListEl.appendChild(item);
-      });
     }
 
-    function renderManualSelect() {
+    function renderCheckList() {
       const set = completedSet();
-      const remaining = names.filter(name => !set.has(normalizeName(name)));
+      checkListEl.innerHTML = "";
 
-      manualSelect.innerHTML = "";
+      names.forEach((name) => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "check-item" + (set.has(normalizeName(name)) ? " done" : "");
+        item.addEventListener("click", function () {
+          toggleCompleted(name);
+        });
 
-      if (remaining.length === 0) {
-        const option = document.createElement("option");
-        option.textContent = "Alle er gjennomført";
-        option.value = "";
-        manualSelect.appendChild(option);
-        manualSelect.disabled = true;
-        manualAddBtn.disabled = true;
-        return;
-      }
+        const icon = document.createElement("span");
+        icon.className = "check-icon";
+        icon.textContent = "✓";
 
-      remaining.forEach(name => {
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        manualSelect.appendChild(option);
+        const text = document.createElement("span");
+        text.className = "name-text";
+        text.textContent = name;
+
+        item.appendChild(icon);
+        item.appendChild(text);
+        checkListEl.appendChild(item);
       });
-
-      manualSelect.disabled = false;
-      manualAddBtn.disabled = false;
     }
 
     function renderStatus() {
@@ -584,7 +535,7 @@
       statusEl.textContent =
         done + " gjennomført · " +
         remaining + " igjen" +
-        (history.length ? " · siste: " + history[history.length - 1] : "");
+        (history.length ? " · siste trekning: " + history[history.length - 1] : "");
 
       spinBtn.disabled = spinning || remaining === 0;
       undoBtn.disabled = spinning || history.length === 0;
@@ -592,8 +543,7 @@
     }
 
     function renderAll() {
-      renderDoneList();
-      renderManualSelect();
+      renderCheckList();
       renderStatus();
       drawWheel();
     }
@@ -919,7 +869,7 @@
     function startNewRound() {
       if (spinning || completed.length === 0) return;
 
-      const ok = confirm("Vil du starte en ny runde og tømme Gjennomført-listen?");
+      const ok = confirm("Vil du starte en ny runde og fjerne alle avkrysninger?");
       if (!ok) return;
 
       completed = [];
@@ -983,16 +933,6 @@
     undoBtn.addEventListener("click", undoLast);
     newRoundBtn.addEventListener("click", startNewRound);
     exportBtn.addEventListener("click", exportList);
-
-    manualAddBtn.addEventListener("click", function () {
-      const name = manualSelect.value;
-      if (!name) return;
-
-      addCompleted(name, false);
-      winningIndex = null;
-      messageEl.textContent = name + " er lagt til i Gjennomført.";
-      resultEl.textContent = "";
-    });
 
     importFile.addEventListener("change", function () {
       if (importFile.files && importFile.files[0]) {
